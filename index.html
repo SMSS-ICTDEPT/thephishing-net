@@ -1,8 +1,9 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>The Phishing Net</title>
+<title>The Phishing Net – Cyber Wellness</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
@@ -12,10 +13,9 @@ body {
   margin: 0;
   min-height: 100vh;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 }
-
 .card {
   background: white;
   padding: 24px;
@@ -24,40 +24,18 @@ body {
   width: 100%;
   box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
-
-h1 { font-size: 22px; margin-top: 0; }
-h2 { font-size: 18px; }
-
-label {
-  display: block;
-  margin: 8px 0;
-  cursor: pointer;
-}
-
+label { display:block; margin:8px 0; }
 button {
-  padding: 10px 16px;
-  margin-top: 12px;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
+  padding:10px 16px;
+  margin-top:12px;
+  border:none;
+  border-radius:6px;
+  background:#2563eb;
+  color:white;
+  cursor:pointer;
 }
-
-.submit {
-  background: #2563eb;
-  color: white;
-}
-
-.feedback {
-  margin-top: 12px;
-  font-weight: bold;
-}
-
-.status {
-  margin-top: 8px;
-  font-size: 13px;
-  color: #555;
-}
+.feedback { margin-top:10px; font-weight:bold; }
+.status { margin-top:6px; font-size:13px; color:#555; }
 </style>
 </head>
 
@@ -72,16 +50,16 @@ const questions = [
   ["Phishing emails often:", ["Create urgency", "Are always polite", "Contain strange links", "Come from friends"], [0,2]],
   ["Is it safe to enter passwords from email or SMS links?", ["Yes", "No"], [1]],
   ["Which password is stronger?", ["Password123", "ILoveChickenRice2025!"], [1]],
-  ["Someone online asks for your Password. What should you do?", ["Share part of it", "Ignore, block and report"], [1]],
+  ["Someone online asks for your password. What should you do?", ["Share part", "Ignore, block and report"], [1]],
   ["You receive a prize you never entered. What should you do?", ["Click to claim", "Ignore, delete and report"], [1]],
   ["Avoid doing which on public Wi‑Fi?", ["Watching videos", "Logging into bank accounts"], [1]],
   ["Unexpected email attachments should be:", ["Opened quickly", "Verified or deleted"], [1]],
   ["Which website is safer?", ["http://example.com", "https://example.com"], [1]],
   ["Fake profiles often:", ["Have few details", "Have many friends"], [0]],
-  ["Who should see your personal social media posts?", ["Everyone", "Friends only"], [1]],
+  ["Who should see your personal posts?", ["Everyone", "Friends only"], [1]],
   ["Apps should be downloaded from:", ["Random websites", "Official app stores"], [1]],
   ["Two‑factor authentication adds:", ["Extra security", "Extra ads"], [0]],
-  ["Best response to negative online comments?", ["Reply angrily", "Ignore or report"], [1]],
+  ["Best response to negative comments?", ["Reply angrily", "Ignore or report"], [1]],
   ["If you see cyberbullying, you should:", ["Join in", "Report and tell a trusted adult"], [1]],
   ["Best cyber wellness habit?", ["Think before acting online", "Click quickly"], [0]]
 ];
@@ -90,16 +68,16 @@ function render() {
   const game = document.getElementById("game");
 
   if (step >= questions.length) {
-    let badge =
+    const badge =
       score >= 140 ? "🛡️ Cyber Wellness Champion" :
-      score >= 80  ? "🔐 Cyber Smart User" :
-      score >= 30  ? "🕵️ Phishing Spotter" :
+      score >= 80 ? "🔐 Cyber Smart User" :
+      score >= 30 ? "🕵️ Phishing Spotter" :
       "Participant";
 
     game.innerHTML = `
-      <h1>🎉 You Escaped The Phishing Net!</h1>
+      <h2>🎉 You Escaped The Phishing Net!</h2>
       <p><strong>Final Score:</strong> ⭐ ${score}</p>
-      <p><strong>Badge Earned:</strong> ${badge}</p>
+      <p><strong>Badge:</strong> ${badge}</p>
       <p><em>MOE Cyber Wellness Message:</em><br>
       Think Before You Click. Protect Personal Information.</p>
     `;
@@ -109,38 +87,34 @@ function render() {
   const q = questions[step];
 
   game.innerHTML = `
-    <h1>🕸️ The Phishing Net</h1>
     <h2>Question ${step + 1} of ${questions.length}</h2>
     <p>${q[0]}</p>
 
-    ${q[1].map((opt, i) => `
+    ${q[1].map((opt,i)=>`
       <label>
-        <input type="${q[2].length > 1 ? 'checkbox' : 'radio'}"
-               name="opt" value="${i}">
+        <input type="${q[2].length>1?'checkbox':'radio'}" name="opt" value="${i}">
         ${opt}
       </label>
     `).join("")}
 
-    <button class="submit" onclick="check()">Submit</button>
+    <button onclick="check()">Submit</button>
     <div class="feedback" id="feedback"></div>
-    <div class="status">⭐ Score: ${score}</div>
+    <div class="status">Score: ⭐ ${score}</div>
   `;
 }
 
 function check() {
   const chosen = [...document.querySelectorAll("input[name='opt']:checked")]
-    .map(e => +e.value);
-
+    .map(e=>+e.value);
   const correct = questions[step][2];
 
-  if (chosen.length === correct.length &&
-      chosen.every(v => correct.includes(v))) {
+  if (chosen.length === correct.length && chosen.every(v=>correct.includes(v))) {
     score += 10;
     step++;
     render();
   } else {
     document.getElementById("feedback").innerText =
-      "❌ Not quite. Try again after thinking carefully.";
+      "❌ Not quite. Try again.";
   }
 }
 
