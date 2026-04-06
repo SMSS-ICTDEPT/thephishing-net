@@ -39,6 +39,12 @@ button {
 .reset { background:#e11d48; color:white; margin-left:6px; }
 .feedback { margin-top:10px; font-weight:bold; }
 .status { margin-top:8px; font-size:13px; color:#555; }
+.explain {
+  background:#eef2ff;
+  padding:16px;
+  border-radius:8px;
+  margin-top:12px;
+}
 </style>
 </head>
 
@@ -50,26 +56,117 @@ let step = 0;
 let score = 0;
 let timeLeft = 20;
 let timer = null;
+let showExplanation = false;
 
 // Offline attempt logging
 let attempts = Number(localStorage.getItem("phishing_attempts")) || 0;
 
 const questions = [
-  ["Phishing emails often:", ["Create urgency","Are always polite","Contain strange links","Come from friends"], [0,2]],
-  ["Is it safe to enter passwords from email/SMS links?", ["Yes","No"], [1]],
-  ["Which password is stronger?", ["Password123","ILoveChickenRice2025!"], [1]],
-  ["Someone asks for your password online. You should:", ["Share part","Ignore, block and report"], [1]],
-  ["You receive a prize you never entered. What should you do?", ["Click to claim","Ignore, delete and report"], [1]],
-  ["Avoid doing which on public Wi‑Fi?", ["Watching videos","Logging into bank accounts"], [1]],
-  ["Unexpected email attachments should be:", ["Opened quickly","Verified or deleted"], [1]],
-  ["Which website is safer?", ["http://example.com","https://example.com"], [1]],
-  ["Fake profiles often:", ["Have few details","Have many friends"], [0]],
-  ["Who should see your personal posts?", ["Everyone","Friends only"], [1]],
-  ["Apps should be downloaded from:", ["Random websites","Official app stores"], [1]],
-  ["Two‑factor authentication adds:", ["Extra security","Extra ads"], [0]],
-  ["Best response to online insults?", ["Reply angrily","Ignore or report"], [1]],
-  ["If you see cyberbullying, you should:", ["Join in","Report and tell a trusted adult"], [1]],
-  ["Best cyber wellness habit?", ["Think before acting online","Click quickly"], [0]]
+  {
+    q: "Phishing emails often:",
+    options: ["Create urgency","Are always polite","Contain strange links","Come from friends"],
+    correct: [0,2],
+    explanation:
+      "Phishing messages try to rush users into acting quickly and often include suspicious links. Encourage students to pause and verify before clicking."
+  },
+  {
+    q: "Is it safe to enter passwords from email or SMS links?",
+    options: ["Yes","No"],
+    correct: [1],
+    explanation:
+      "MOE Cyber Wellness advises students to go directly to official websites instead of clicking links in messages."
+  },
+  {
+    q: "Which password is stronger?",
+    options: ["Password123","ILoveChickenRice2025!"],
+    correct: [1],
+    explanation:
+      "Long passphrases are harder for attackers to guess than short, common passwords."
+  },
+  {
+    q: "Someone asks for your password online. You should:",
+    options: ["Share part","Ignore, block and report"],
+    correct: [1],
+    explanation:
+      "Passwords should never be shared. Blocking and reporting helps keep accounts safe."
+  },
+  {
+    q: "You receive a prize you never entered. What should you do?",
+    options: ["Click to claim","Ignore, delete and report"],
+    correct: [1],
+    explanation:
+      "Fake prizes are a common scam tactic. If it sounds too good to be true, it usually is."
+  },
+  {
+    q: "Avoid doing which on public Wi‑Fi?",
+    options: ["Watching videos","Logging into bank accounts"],
+    correct: [1],
+    explanation:
+      "Public Wi‑Fi networks are not secure for sensitive activities."
+  },
+  {
+    q: "Unexpected email attachments should be:",
+    options: ["Opened quickly","Verified or deleted"],
+    correct: [1],
+    explanation:
+      "Unexpected files may contain malware. Always verify first."
+  },
+  {
+    q: "Which website is safer?",
+    options: ["http://example.com","https://example.com"],
+    correct: [1],
+    explanation:
+      "HTTPS shows that the connection is encrypted and safer."
+  },
+  {
+    q: "Fake profiles often:",
+    options: ["Have few details","Have many friends"],
+    correct: [0],
+    explanation:
+      "Fake accounts usually lack genuine photos or personal details."
+  },
+  {
+    q: "Who should see your personal posts?",
+    options: ["Everyone","Friends only"],
+    correct: [1],
+    explanation:
+      "Privacy settings help protect personal information online."
+  },
+  {
+    q: "Apps should be downloaded from:",
+    options: ["Random websites","Official app stores"],
+    correct: [1],
+    explanation:
+      "Official stores scan apps for security risks."
+  },
+  {
+    q: "Two‑factor authentication adds:",
+    options: ["Extra security","Extra ads"],
+    correct: [0],
+    explanation:
+      "2FA provides an extra layer of protection beyond passwords."
+  },
+  {
+    q: "Best response to online insults?",
+    options: ["Reply angrily","Ignore or report"],
+    correct: [1],
+    explanation:
+      "Ignoring or reporting prevents situations from escalating."
+  },
+  {
+    q: "If you see cyberbullying, you should:",
+    options: ["Join in","Report and tell a trusted adult"],
+    correct: [1],
+    explanation:
+      "Reporting cyberbullying and telling a trusted adult supports a safer online environment."
+  },
+  {
+    q: "Best cyber wellness habit?",
+    options: ["Think before acting online","Click quickly"],
+    correct: [0],
+    explanation:
+      "Thinking before acting is the key message of MOE Cyber Wellness."
+  }
 ];
 
 function startTimer() {
@@ -81,21 +178,14 @@ function startTimer() {
     if (timeLeft <= 0) {
       clearInterval(timer);
       document.getElementById("feedback").innerText =
-        "⏰ Time’s up. Pause, think, and try again.";
+        "⏰ Time’s up. Pause and try again.";
     }
   }, 1000);
 }
 
 function updateStatus() {
-  const badge =
-    score >= 140 ? "🛡️ Cyber Wellness Champion" :
-    score >= 80 ? "🔐 Cyber Smart User" :
-    score >= 30 ? "🕵️ Phishing Spotter" :
-    "Participant";
-
   document.getElementById("status").innerHTML =
-    `⏱️ ${timeLeft}s | ⭐ ${score} | 🔁 Attempts: ${attempts}<br>
-     🏅 ${badge}`;
+    `⏱️ ${timeLeft}s | ⭐ ${score} | 🔁 Attempts: ${attempts}`;
 }
 
 function render() {
@@ -103,21 +193,22 @@ function render() {
 
   if (step >= questions.length) {
     clearInterval(timer);
-    localStorage.removeItem("phishing_attempts");
-
     game.innerHTML = `
       <h2>🎉 You Escaped The Phishing Net!</h2>
       <p><strong>Final Score:</strong> ⭐ ${score}</p>
       <p><strong>Total Attempts:</strong> 🔁 ${attempts}</p>
-      <p><strong>Badge Earned:</strong>
-        ${score>=140?"🛡️ Cyber Wellness Champion":
-          score>=80?"🔐 Cyber Smart User":
-          score>=30?"🕵️ Phishing Spotter":"Participant"}
-      </p>
       <p><em>MOE Cyber Wellness Message:</em><br>
-        Think Before You Click. Protect Personal Information.
-      </p>
+        Think Before You Click. Protect Personal Information.</p>
       <button class="submit" onclick="resetGame()">Play Again</button>
+    `;
+    return;
+  }
+
+  if (showExplanation) {
+    game.innerHTML = `
+      <h2>✅ Teacher Explanation</h2>
+      <div class="explain">${questions[step].explanation}</div>
+      <button class="submit" onclick="continueGame()">Continue</button>
     `;
     return;
   }
@@ -126,11 +217,11 @@ function render() {
   game.innerHTML = `
     <h1>🕸️ The Phishing Net</h1>
     <h2>Question ${step+1} of ${questions.length}</h2>
-    <p>${q[0]}</p>
+    <p>${q.q}</p>
 
-    ${q[1].map((o,i)=>`
+    ${q.options.map((o,i)=>`
       <label>
-        <input type="${q[2].length>1?'checkbox':'radio'}" name="opt" value="${i}">
+        <input type="${q.correct.length>1?'checkbox':'radio'}" name="opt" value="${i}">
         ${o}
       </label>
     `).join("")}
@@ -141,7 +232,6 @@ function render() {
     <div class="feedback" id="feedback"></div>
     <div class="status" id="status"></div>
   `;
-
   startTimer();
   updateStatus();
 }
@@ -152,17 +242,24 @@ function check() {
 
   const chosen = [...document.querySelectorAll("input[name='opt']:checked")]
     .map(e=>+e.value);
-  const correct = questions[step][2];
+  const correct = questions[step].correct;
 
   if (chosen.length === correct.length &&
       chosen.every(v=>correct.includes(v))) {
     score += 10;
-    step++;
+    clearInterval(timer);
+    showExplanation = true;
     render();
   } else {
     document.getElementById("feedback").innerText =
-      "❌ Not quite. Try again after thinking carefully.";
+      "❌ Not quite. Try again.";
   }
+}
+
+function continueGame() {
+  showExplanation = false;
+  step++;
+  render();
 }
 
 function resetGame() {
@@ -172,6 +269,7 @@ function resetGame() {
     score = 0;
     attempts = 0;
     localStorage.removeItem("phishing_attempts");
+    showExplanation = false;
     render();
   }
 }
@@ -180,4 +278,3 @@ render();
 </script>
 </body>
 </html>
-``
